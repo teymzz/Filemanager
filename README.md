@@ -326,157 +326,156 @@ Reading from files is usually done by specifying a key and a separator character
    ##### Editing a text file 
    There are five different ways of modifying text files which include the use of ```textLine()```, ```textWrite()```, ```textUpdate()```, ```textReplace()``` and ```textDelete()``` methods.
 
-     ###### textLine()
-     This method is used to write a new line into text file with options before or after a specified line.
+   ###### textLine()
+   This method is used to write a new line into text file with options before or after a specified line.
 
-     ```php
-     $Filemanager->textLine($number, $position);
-     ```
+   ```php
+   $Filemanager->textLine($number, $position);
+   ```
 
-     + ```$number``` number of new lines to be added to text file.
-     + ```$position``` specified where the lines should be added. 
+   + ```$number``` number of new lines to be added to text file.
+   + ```$position``` specified where the lines should be added. 
 
-     > Assuming we have a file  _user.txt_, we can add new lines to the file using the format below 
+   > Assuming we have a file  _user.txt_, we can add new lines to the file using the format below 
 
-     ```php 
-     $Filemanager->setUrl('user.txt');
+   ```php 
+   $Filemanager->setUrl('user.txt');
     
-     $contents = $Filemanager->textLine(2); // add two new lines
-     ```
+   $contents = $Filemanager->textLine(2); // add two new lines
+   ```
    
-     > If the file already contains a text, we can specify the position of line using ```after``` or ```before``` as shown below : 
+   > If the file already contains a text, we can specify the position of line using ```after``` or ```before``` as shown below : 
 
-     ```txt
-     name:  Foo name; 
-     class: Foo class
-     ```
+   ```txt
+   name:  Foo name; 
+   class: Foo class
+   ```
      
-     ```php
-     $Filemanager->setUrl('user.txt');
+   ```php
+   $Filemanager->setUrl('user.txt');
 
-     $Filemanager->textLine(2, ['after' => 'name']); // add two lines after line of key 'name:'
-     ```
+   $Filemanager->textLine(2, ['after' => 'name']); // add two lines after line of key 'name:'
+   ```
        
-     ###### textWrite()
-     This method is used to write texts into a text file
+   ###### textWrite()
+   This method is used to write texts into a text file
   
-     ```php
-     $Filemanager->textLine($data, $options);
-     ```
+   ```php
+   $Filemanager->textLine($data, $options);
+   ```
 
-     + ```$data``` array list of keys and values pairs
-     + ```$options``` used to define position and separator character 
+   + ```$data``` array list of keys and values pairs
+   + ```$options``` used to define position and separator character 
 
-     > Assuming we have a file  _user.txt_, we can add new keys to the file using the format below :
+   > Assuming we have a file  _user.txt_, we can add new keys to the file using the format below :
 
-     ```php 
-     $Filemanager->setUrl('user.txt');
+   ```php 
+   $Filemanager->setUrl('user.txt');
     
-     $Filemanager->textWrite(['name' => 'foo']); // add two new lines
-     ```
+   $Filemanager->textWrite(['name' => 'foo']); // add two new lines
+   ```
    
-     > We can specify separator character through supplied options with ```separator``` key. Also if the file already contain keys, we can specify the position of new keys  with ```before``` or ```after``` options as shown below : 
+   > We can specify separator character through supplied options with ```separator``` key. Also if the file already contain keys, we can specify the position of new keys  with ```before``` or ```after``` options as shown below : 
 
-     ```txt
-     name:  Foo name; 
-     class: Foo class
-     ```    
+   ```txt
+   name:  Foo name; 
+   class: Foo class
+   ```    
 
-     ```php 
-     $Filemanager->setUrl('user.txt');    
+   ```php 
+   $Filemanager->setUrl('user.txt');    
 
-     $Filemanager->textWrite(['age' => 'foo'], ['after' => 'name', 'separator' => ':']); // add key after "name"
-     ```
+   $Filemanager->textWrite(['age' => 'foo'], ['after' => 'name', 'separator' => ':']); // add key after "name"
+   ```
 
-     ###### textUpdate()
-     This method is used to update the values of already existing keys in a text file. If the specified keys do not exist, keys 
-     will be added to separate lines
+   ###### textUpdate()
+   This method is used to update the values of already existing keys in a text file. If the specified keys do not exist, keys will be added to separate lines
   
-     ```php
-     $Filemanager->textUpdate($data, $upds, $separator);
-     ```
+   ```php
+   $Filemanager->textUpdate($data, $upds, $separator);
+   ```
 
-     + ```$data``` array list of keys and values pairs
-     + ```$upds``` used to store only updated values
-     + ```$separator``` used to set separator character. Default is ```colon```
+   + ```$data``` array list of keys and values pairs
+   + ```$upds``` used to store only updated values
+   + ```$separator``` used to set separator character. Default is ```colon```
 
-     > Assuming we have a file  _user.txt_, we can add or update keys of the file using the format below :
+   > Assuming we have a file  _user.txt_, we can add or update keys of the file using the format below :
 
-     ```txt
-     name:  Foo name; 
-     class: Foo class
-     ```    
+   ```txt
+   name:  Foo name; 
+   class: Foo class
+   ```    
 
-     ```php 
-     $Filemanager->setUrl('user.txt');
+   ```php 
+   $Filemanager->setUrl('user.txt');
     
-     $Filemanager->textUpdate(['name' => 'Bar name', 'age' => '50']); // 
-     ```
+   $Filemanager->textUpdate(['name' => 'Bar name', 'age' => '50']); // 
+   ```
    
-     > The resulting text file will look like the format below
+   > The resulting text file will look like the format below
 
-     ```txt
-     name:  Bar name; 
-     class: Foo class;
-     age: 50
-     ```   
+   ```txt
+   name:  Bar name; 
+   class: Foo class;
+   age: 50
+   ```   
 
-     ###### textReplace()
-     This method is used to replace a key's value only if that key exists.
+   ###### textReplace()
+   This method is used to replace a key's value only if that key exists.
   
-     ```php
-     $Filemanager->textReplace($data, $separator);
-     ```
+   ```php
+   $Filemanager->textReplace($data, $separator);
+   ```
 
-     + ```$data``` array list of keys and values pairs
-     + ```$separator``` used to set separator character. Default is ```colon```
+   + ```$data``` array list of keys and values pairs
+   + ```$separator``` used to set separator character. Default is ```colon```
 
-     > Assuming we have a file  _user.txt_, we can replace the existing keys' value :
+   > Assuming we have a file  _user.txt_, we can replace the existing keys' value :
 
-     ```txt
-     name:  Foo name; 
-     class: Foo class
-     ```    
+   ```txt
+   name:  Foo name; 
+   class: Foo class
+   ```    
 
-     ```php 
-     $Filemanager->setUrl('user.txt');
+   ```php 
+   $Filemanager->setUrl('user.txt');
     
-     $Filemanager->textUpdate(['name' => 'Bar name']); // 
-     ```
+   $Filemanager->textUpdate(['name' => 'Bar name']); // 
+   ```
    
-     > The resulting text file will look like the format below
+   > The resulting text file will look like the format below
 
-     ```txt
-     name:  Bar name; 
-     class: Foo class;
-     ```   
+   ```txt
+   name:  Bar name; 
+   class: Foo class;
+   ```   
 
-     ##### Reading a file without instantiating the class 
-     We can read a readable file without instantiating the class itself by using the ```load()``` method. This method will read all the contents of a file which is equivalent to the ```readAll()``` method. 
+   ##### Reading a file without instantiating the class 
+   We can read a readable file without instantiating the class itself by using the ```load()``` method. This method will read all the contents of a file which is equivalent to the ```readAll()``` method. 
 
-     ```php
-     Filemanager::load($url, $separator); 
-     ```
+   ```php
+   Filemanager::load($url, $separator); 
+   ```
 
-     + ```$url``` path of the file to be read
-     + ```$separator``` a key to value separator character 
+   + ```$url``` path of the file to be read
+   + ```$separator``` a key to value separator character 
 
-     ##### Reading a file into the global ENV environment 
-     Readable file keys and value can be stored into the global ```$_ENV``` environment using the ```loadenv()``` method. By default, values are stored under the ```$_ENV[':ENV']``` key
+   ##### Reading a file into the global ENV environment 
+   Readable file keys and value can be stored into the global ```$_ENV``` environment using the ```loadenv()``` method. By default, values are stored under the ```$_ENV[':ENV']``` key
 
-     ```php
-     Filemanager::loadenv($url, $key, $separator); 
-     ```
+   ```php
+   Filemanager::loadenv($url, $key, $separator); 
+   ```
 
-     + ```$url``` path of the file to be read
-     + ```$key``` default key is _':ENV'_ . While boolean value of true will store data directly to ```$_ENV```, false prevents overwriting predefined default $_ENV key. If a custom string name is defined, the name will be used as replacement for the default ':ENV'.
-     + ```$separator``` a key to value separator character. 
+   + ```$url``` path of the file to be read
+   + ```$key``` default key is _':ENV'_ . While boolean value of true will store data directly to ```$_ENV```, false prevents overwriting predefined default $_ENV key. If a custom string name is defined, the name will be used as replacement for the default ':ENV'.
+   + ```$separator``` a key to value separator character. 
 
-     ##### Detecting ENV key
-     The ```env_key()``` method is used to detect the last custom key used in ```loadenv()``` method. By default this returns ```:ENV```.
+   ##### Detecting ENV key
+   The ```env_key()``` method is used to detect the last custom key used in ```loadenv()``` method. By default this returns ```:ENV```.
 
-     ##### Detecting ENV data
-     The ```env_data()``` method is used to detect the last data saved into the ```$_ENV``` global variable when ```loadenv()``` method was used. 
+   ##### Detecting ENV data
+   The ```env_data()``` method is used to detect the last data saved into the ```$_ENV``` global variable when ```loadenv()``` method was used. 
 
 #### Fetching errors 
 The method ```err()``` returns the last error detected if an error occurs within the Filemanager system. However, when working with zip files, the ```fails()``` and ```succeeds()``` method can help to detect the error that occurs in the process of zipping or decompressing a file. Example of usage is shown below 
