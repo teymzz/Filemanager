@@ -4,7 +4,7 @@ namespace Spoova\Filemanager;
 
 use ZipArchive;
 
-use Spoova\Filemanager\Enlist;
+use Spoova\Enlist\Enlist;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
