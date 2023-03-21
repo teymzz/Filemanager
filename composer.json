@@ -1,0 +1,21 @@
+{
+    "name": "spoova/filemanager",
+    "description": "Spoova package for managing files",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Spoova\\Filemanager\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Akinola Saheed",
+            "email": "teymss@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "spoova/enlist":"^1"
+    }
+}
