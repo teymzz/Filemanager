@@ -21,7 +21,6 @@ class FileManager extends Enlist{
     private $response = '';
     private $error;
 
-
     /**
      * Checks if an array exists inside another array
      *
@@ -40,9 +39,19 @@ class FileManager extends Enlist{
      * Set a url for reading content
      * 
      * @param string $url url of file or folder to be managed
-     * @return class
+     * @param bool|int $setSource Determines if source url for Enlist class is defined
+     *    - If defined, setUrl function will act and return as Enlist::source() 
+     *    - If defined as true, will assume the default value of Enlist::source() 
+     *    - Note that the character '*' or boolean(true) defines all extension as in the case of Enlist::source();
+     * @return Filemanager|Enlist
+     *    - Returns Filemanager class when only one argument is defined.
+     *    - Returns Enlist class when argument 2 (i.e $setSource) is defined
     */
-    public function setUrl(string $url = ''){
+    public function setUrl(string $url = '', array|bool|string $setSource = '*') : FileManager|Enlist {
+      if(func_num_args() > 1) {
+        if($setSource === true) return $this->source($url);
+        return $this->source(...func_get_args());
+      }
       $this->url = $url;
       $this->lastDir = $url;
       return $this;
@@ -157,11 +166,12 @@ class FileManager extends Enlist{
      * @param array|string $key list of key(s) to be fetched from file. Bool:true reads entire file
      * @param string|bool $separator A line key-to-value unique separator character
      *
-     * @return array|bool :
-     *        @return array array of keys and values => if @param $separator character is defined (NOT true) and @param array|string $key(s) exist in file
-     *        @return bool(true)                     => if @param $separator === true and @param string $key exists in file
-     *        @return bool(false)                    => if @param $separator === true and @param string $key does not exists in file or file in not readable
-     *        @throw Notice Error                    => if file is not readable or separator is the same as delimiter
+     * @return array|bool returns an array or bool depending on certain conditions
+     *    - (array) array of keys and values => if $separator character is defined (NOT true) and string(s) of $key or $key[] exist in file
+     *    - (bool)  true                     => if $separator === true and string of $key exists in file
+     *    - (bool) false                     => if $separator === true and string of $key does not exists in file or file in not readable
+     * 
+     * @throws Notice Error if file is not readable or separator is the same as delimiter
      */
     public function readFile($key = null, $separator= ":"){
       
@@ -225,7 +235,7 @@ class FileManager extends Enlist{
                   $lineText = rtrim(trim($lineText), $delimiter.' ');
 
                   //* add space if necessary
-                  if($lineText2) $textkey .= " ";
+                  if(!empty($lineText2)) $textkey .= " ";
                   $lineText = explode($separator, $lineText, 2);
                   
 
@@ -347,6 +357,7 @@ class FileManager extends Enlist{
      *
      * @Note: This will create directories if it does not exist
      * @param array|string[] $urls list of paths to be created
+     * @param array|void $files contains referenced list of paths created
      * @return bool
      */
     public function openFiles(array|string $urls, &$files = []) : bool {
@@ -363,10 +374,11 @@ class FileManager extends Enlist{
 
           if(trim($url)) {
 
-              if(!$this->openFile(true, $url)) {
-                $files[] = $url;
-                return false;
-              }
+            if($this->openFile(true, $url)) {
+              $files[] = $url;
+            }else{
+              return false;
+            }
 
           }
 
@@ -402,9 +414,7 @@ class FileManager extends Enlist{
         if(is_numeric($key)) trigger_error('keys must have a string name',E_USER_ERROR);
         $newText .= " ".$key.$separator." ".(is_array($value)? "[".json_encode($value)."]" : $value).$delimiter."\n";  
       }
-      //if(is_array($value)) $value = "[".json_encode($value)."]";
 
-      //$newText = $key."".$value;
       $newText = rtrim(preg_replace('/[[:blank:]]+/',' ',$newText));
       $newText = $this->reFormat($newText);
       return $this->writerEngine($newText, $options, 'wFile');
@@ -466,7 +476,7 @@ class FileManager extends Enlist{
           foreach($data as $key => $value){
             if(is_numeric($key)) trigger_error('keys must have a string name',E_USER_ERROR);
 
-            //may later require trimming later...
+            //may later require trimming...
             $arrLines[] = $key.$separator." ".(is_array($value)? "[".json_encode($value)."]" : $value);
 
           }
@@ -868,7 +878,7 @@ class FileManager extends Enlist{
      * @param string $path new directory to be created 
      * @return bool true if directory is created or exists else return false
      */
-    public function addDir(string $path = '') : bool {
+    public function addDir(string $path) : bool {
 
       if(pathinfo($path,PATHINFO_EXTENSION) != ''){
         return $this->response('invalid name supplied!');
@@ -921,7 +931,7 @@ class FileManager extends Enlist{
         return str_replace('/','\\',(is_dir($dir) && is_string($path))? rtrim($dir, '/ ').'/'.ltrim($path, '/ ') : $path);
       }, $exclude);
 
-      foreach($files as $name => $file){
+      foreach($files as $file){
         
          if(!$file->isDir()){
 
@@ -941,6 +951,7 @@ class FileManager extends Enlist{
           }
 
          }
+
       }
 
       $zip->close();
@@ -982,8 +993,10 @@ class FileManager extends Enlist{
       if(!is_dir($foldername)){
 
         if($this->addDir($foldername)) {
-          //decompress zip file
+
+          // decompress zip file
           $zip = new ZipArchive;
+
           if($zip->open($curdir)){
               $zip->extractTo($foldername);
               $zip->close();
@@ -992,7 +1005,8 @@ class FileManager extends Enlist{
           } else {
             $this->error = ('cannot open zip file to decompress');
             return $this;        
-          }          
+          }    
+
         } else {
             $this->error = ('cannot decompress to missing directory: "'.$foldername.'"');
             return $this; 
@@ -1033,10 +1047,10 @@ class FileManager extends Enlist{
      */
     public function copyTo(string $newdir, string $newname = '', bool $strict = false) : Filemanager {
 
-      //prevent or allow further code execution if has previous error
+      // prevent or allow further code execution if has previous error
       if($this->error && !$strict) return $this;
 
-      //modify error status on strict code execution if has previous error
+      // modify error status on strict code execution if has previous error
       if($this->error && $strict) $this->error = false;      
 
       if(!file_exists($this->lastDir)) {
@@ -1073,10 +1087,10 @@ class FileManager extends Enlist{
      */
     public function moveTo(string $newdir, string $newname = '', bool $strict = false) : FileManager {
       
-      //prevent or allow further code execution if has previous error
+      // prevent or allow further code execution if has previous error
       if($this->error && !$strict) return $this;
 
-      //modify error status on strict code execution if has previous error
+      // modify error status on strict code execution if has previous error
       if($this->error && $strict) $this->error = false;     
 
       if(!file_exists($this->lastDir)) {
@@ -1089,7 +1103,7 @@ class FileManager extends Enlist{
         return $this;
       }
 
-      //set new path or directory
+      // set new path or directory
       $newDir = realpath($newdir)."\\";
       $newDir .= ($newname == '')? basename($this->lastDir) : $newname;
   
@@ -1159,25 +1173,28 @@ class FileManager extends Enlist{
       if(!file_exists($selection)){ return false; }
 
       if(func_num_args() === 1){
-        //move selection to a new location
+
+        // move selection to a new location
         
         if(!is_dir($param1)){ return false; }
         rename($selection, $param1);
         return file_exists($param1."/".$param2);
+
       }
 
       if(func_num_args() === 2){
+
         //move $param1 in selection to $param2
         if(!file_exists($param2)){ 
           $this->error = ('invalid destination path "'.$this->lastDir.'" supplied as argument(#2) on Filemanager::move() ');
           return false; 
         }
-
       
         if(file_exists($selection.'/'.$param1)){    
           rename($selection.'/'.$param1, $param2.'/'.$param1);
           return file_exists($param2.'/'.$param1);
         }
+
         return false;
       }
 
@@ -1187,30 +1204,117 @@ class FileManager extends Enlist{
     /**
      * Deletes a supplied file or folder directory
      *
-     * @param string $dir
+     * @param string $dir source directory or file path
      *  - When not defined, deletes the last defined url.
+     *  - This does not update the last url
+     * @param array $selection defines an array list that can either be used to select a list of items to be removed or excluded 
+     *  - array list should contain an "include" or "exclude" key but not both.
+     *  - When using $selection, be conscious of case-sensitivity of file names and paths.
+     * @param array $removals defines the list of removed items
      * @return boolean
      */
-    public function deleteFile($dir = '') : bool {
+    public function deleteFile($dir = '', array $selection = [], &$removals = []) : bool {
 
       $path = realpath((func_num_args() > 0)? $dir : $this->url);
 
+      $path = rtrim(str_replace('\\', '/', $path), '/');
+
+      // default variables 
+      $includes = []; $excludes = [];
 
       if(file_exists($path)){
 
-        //remove all items in folder first
-        foreach(glob($path.'/*') as $file){
-            if(is_file($file)){
-                unlink($file);
-            }elseif(is_dir($file)){
-                $this->deleteFile($file);
-            }
-        }    
+        // resolve files 
+        if(is_file($path)) {
+           if(unlink($path)){
+            $removals[] = $path;
+            return true;
+           }
+           return false;
+        }
 
-        //delete folder
-        if(is_dir($path)) rmdir($path);
+        // resolve directories
+        if($selection){
 
-        return true;
+          $excludes = (array) ($selection['exclude'] ?? []);
+          $includes = (array) ($selection['include'] ?? []);
+
+          if(is_dir($path)){
+            $excludes = array_map(fn($value) => $path.'/'.ltrim(rtrim(str_replace(['\\', '/'], '/', $value), '/'), '/'), $excludes);
+            $includes = array_map(fn($value) => $path.'/'.ltrim(rtrim(str_replace(['\\', '/'], '/', $value), '/'), '/'), $includes);
+          }
+
+          if($excludes && $includes){
+            $this->error = ('Filemanager::deleteFile(#2) option can either be exlusive or inclusive but not both"');
+            return false;
+          }
+
+          // get path items and set default response
+          $files = array_diff(scandir($path), ['.','..']);
+          $response = false;
+
+          if($excludes){
+
+              foreach($files as $file){
+                  $response = false;
+                  $filePath = $path."/".$file;
+                  if(is_file($filePath)){
+                    if(!in_array($filePath, $excludes)) {
+                      $response = unlink($filePath);
+                      if($response) $removals[] = $filePath;
+                    }
+                  }elseif(is_dir($filePath)){
+                    if(!in_array($filePath, $excludes)) {
+                      $response = $this->deleteFile($filePath, $selection, $removals);
+                      //check directory ... 
+                      $fileItems = array_diff(scandir($filePath), ['.','..']);
+                      if(count($fileItems) === 0){
+                        $response = rmdir($filePath); 
+                      }
+                    }
+                  }
+              }   
+              return $removals ? true : false;
+          }elseif($includes){
+
+              foreach($files as $file){
+                  $response = false;
+                  $filePath = $path."/".$file;
+                  if(is_file($filePath) && in_array($filePath, $includes)){
+                    $response = unlink($filePath);
+                    if($response) $removals[] = $filePath;
+                  }elseif(is_dir($filePath) && in_array($filePath, $includes)){
+                    $response = $this->deleteFile($filePath, $selection, $removals);
+                    if($response) $removals[] = $filePath;
+                    //check directory ... 
+                    $fileItems = array_diff(scandir($filePath), ['.','..']);
+                    if(count($fileItems) === 0){
+                      $response = rmdir($filePath); 
+                    }
+                  }
+              }
+              return $removals ? true : false;   
+          } 
+          return $response;
+        }else{
+
+            // remove all items in folder first
+            $files = array_diff(scandir($path), ['.','..']);
+
+            foreach($files as $file){
+              $filePath = $path."/".$file;
+                if(is_file($filePath)){
+                    unlink($filePath);
+                }elseif(is_dir($filePath)){
+                    $this->deleteFile($filePath);
+                }
+            }    
+
+            // delete folder
+            if(is_dir($path)) return rmdir($path);   
+            return true;
+        }
+
       } else {
         $this->error = ('cannot delete from an invalid file or folder path "'.$dir.'"');
         return false;
