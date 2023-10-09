@@ -20,27 +20,27 @@ A new directory can only be created by supplying the full path of the new direct
    ```
 
 #### Setting url for activity 
-Aside from few methods like ```addDir()``` and ```openFile()``` methods which have stand-alone capabilities of defining custom urls, when using Filemanger for activities, a url or file path is expected to be defined which helps the Filemanager class to know where the operation is expected to be performed. A directory or file path can be specified with the ```setUrl()``` method. An example is shown below: 
+Aside from few methods like ```addDir()``` and ```openFile()``` methods which have stand-alone capabilities of overiding default urls, when using Filemanger for activities, a url or file path is expected to be defined which helps the Filemanager class to know where the operation is expected to be performed. A directory or file path can be specified with the ```setUrl()``` method. An example is shown below: 
 
    ```php 
    $Filemanager->setUrl(__DIR__); //example of setting a url 
    ```   
 
 #### Create a new file 
-To create a new file, we can use the ```openFile()``` method. This method will only create a file if the file does not exist. A boolean of true will only be returned if the file created is readable.
+To create a new file, we can use the ```openFile()``` method. This method will only create a file if the file does not exist. A boolean of true will be returned if the file created is readable.
 
    ```php
    $Filemanager->openFile($strict, $path); //full path of new directory
    ```
 
-   + ```$strict``` a boolean value of true will allow creating a directory if the expected file destination does not exist while false will prevent creating a new directory for file
+   + ```$strict``` a boolean value of true will allow creating a directory if the expected file destination does not already exist while false will prevent creating a new directory for a file if the directory does not already exist
    + ```$path``` an optional stand-alone file path for file to be created if not earlier defined with ```setUrl()```.
 
    ```php 
    $Filemanager->openFile(true, 'some/path/of/file.txt'); 
    ```
 
-   > We can also specify the file path from the setUrl() method. 
+   > We can also specify the file path from the setUrl() method as shown below
 
    ```php
    $Filemanager->setUrl('some/path/of/file.txt');
@@ -56,7 +56,7 @@ To create multiple files, we can use the ```openFiles()``` method. The first arg
    ```
 
    + ```$paths``` array list of file paths to be created
-   + ```$files``` an optional variable that contains lists of created files
+   + ```$files``` an optional variable that contains lists of successfully created file paths. 
 
    ```php 
    $Filemanager->openFiles(['file.txt', 'file2.txt'], $get_created_files); 
@@ -70,14 +70,14 @@ is defined, we can proceed with the activity.
 
    ##### Set a url 
    ```php
-   $Filemanager->setUrl(__DIR__); 
+   $Filemanager->setUrl(__DIR__); //specify directory
    ```
 
-   ##### Get folders in specifed directory 
+   ##### Get folders in specified directory 
    ```php
    $folders = $Filemanager->getFolders(); //full path of folders
    ```
-   > Only folder names can be harvested without their full paths 
+   > Folder names only can be harvested without their full paths 
    ```php
    $folders = $Filemanager->getFolders(false); // names of folders
    ```   
@@ -87,7 +87,7 @@ is defined, we can proceed with the activity.
    $files = $Filemanager->getFiles();
    ```
 
-   > Only file names and extension can be harvested without their full paths 
+   > File names and extension can be harvested without their full paths as shown below
    ```php
    $files = $Filemanager->getFiles(false); // names of files
    ``` 
@@ -109,10 +109,10 @@ is defined, we can proceed with the activity.
    $folders = $Filemanager->zipUrl($output_name, $excludes);
    ```
 
-   + ```$output_name``` refers to the output name of the zip file. It uses defualt specified url if not defined.
+   + ```$output_name``` refers to the output name of the zip file. It uses default specified url if not defined.
    + ```$excludes``` refers to array list of file name in specified directory that should not be added to zipped file. 
 
-   > We can check if a file is zipped by using the ```zipped()``` method. However, this will not tell if zipped file is broken. 
+   > We can check if a file is zipped by using the ```zipped()``` method. However, this will not tell if the zipped file is broken. 
 
    ```php 
    $Filemanager->setUrl(__DIR__);    
@@ -137,7 +137,7 @@ is defined, we can proceed with the activity.
 
    if($Filemanager->zipped()) {
 
-        echo $Filemanager->lastDir();
+        echo $Filemanager->lastDir(); //directory of zipped file
 
    } else {
 
@@ -169,15 +169,15 @@ is defined, we can proceed with the activity.
    }
    ```
 
-   ##### Move last specified directory or file to another
-   To move the last specified directory to another, the ```moveTo()``` can be applied. This is mostly useful when we want to move a zipped file to another location.
+   ##### Move last specified directory or file to another location
+   To move the last specified directory to another location, the ```moveContentsTo()``` can be applied. This is mostly useful when we want to move a zipped file to another location.
 
    ```php
    $Filemanager->moveContentsTo($newdir, $ignore, $moved);
    ```
 
-   + ```$newdir``` refers to the file or folder destination.
-   + ```$ignore``` refers to file or folder names to be ignored.
+   + ```$newdir``` refers to the new file or folder destination.
+   + ```$ignore``` refers to file or folder names within the last specified url to be ignored from being moved.
    + ```$moved``` this is used to store the names of moved files.
 
    An example of the above is shown below 
@@ -189,20 +189,20 @@ is defined, we can proceed with the activity.
 
    if($Filemanager->zipped()) {
 
-        $Filemanager->moveTo('some/new/directory');
+        $Filemanager->moveContentsTo('some/new/directory');
 
    }
    ```
 
-   ##### Moves a file from one directory to another
-   To move a file or directory to another, the ```moveTo()``` can be applied. This is mostly useful for moving from last or currently specified directory to a new directory which makes it important in cases where we don't want to use the last specified directory.
+   ##### Move last declared directory to another directory with a new name
+   To move a last declared path to another directory while specifying a new output name, the ```moveTo()``` can be applied.
 
    ```php
-   $Filemanager->moveTo($currentPath, $newPath, $strict);
+   $Filemanager->moveTo($newdir, $name, $strict);
    ```
 
-   + ```$currentPath``` refers to old path if ```$newPath``` is specified or destination path if ```$newPath``` is not specified.
-   + ```$newPath``` refers to destination path if specified.
+   + ```$newdir``` refers to new destination directory where last detected path will be moved into. 
+   + ```$name``` Optional. Refers to new output name of a file if specified. This is useful when $newdir is a file path and not directory. If not specified, the moved file will maintain the original file name. 
    + ```$strict``` boolean of true prevents any previous error from stopping operation.
 
    An example of the above is shown below 
@@ -214,12 +214,42 @@ is defined, we can proceed with the activity.
 
    if($Filemanager->zipped()) {
 
-        $Filemanager->moveTo('some/new/directory'); //move zipped file to new path
+        $new_name = 'mydir.zip';
+        
+        $Filemanager->moveTo('some/new/directory', $new_name); //move zipped directory file to new path with new name. 
 
    }
 
-   $Filemanager->moveTo('some/old/path', 'some/new/path'); // move from old to new path
    ```
+
+   ##### Advanced moving of files and directories
+   A more advanced method for moving files or directories to another is the ```move()``` method. The basic syntax is show below:
+   ```php
+   $Filemanager->move($param1, $param2);
+   ```
+
+   + ```$param1``` refers to new destination directory of selected file (or directory) or refers to the subpath of selected directory to be moved into destination directory $param2 if $param2 is defined. 
+   + ```$param2``` refers to destination path of $param1 only if it is supplied.
+
+   The example shown below is that in which a directory or file was moved to another directory. 
+
+   ```php
+   $Filemanger->setUrl(__DIR__.'/'.'folder_or_file_name'); //set a directory or file path
+   
+   $Filemanger->move(__DIR__.'/destination_directory'); //move to new destination directory
+
+   ```
+  
+  > We can also specify that a directory within a primarily selected directory should be moved to another relative or absolute directory as shown below:
+
+   ```php
+   $Filemanger->setUrl(__DIR__); //set a base directory
+   
+   $Filemanger->move('folder_or_file', __DIR__.'/new_directory'); //move to new existing destination directory
+
+   ```
+  
+  The ```move()``` method above will return true or false based on whether the file transfer was successful. 
 
    ##### Deleting a file or directory
    To delete a folder or file, the ```deleteFile()``` method can be employed
@@ -281,7 +311,7 @@ is defined, we can proceed with the activity.
    ```
 
 #### Working with text readable files
-Reading from files is usually done by specifying a key and a separator character. By default, Filemanager uses the colon ```:``` character to differentiate between keys and values. The separator character is one that must not occur twice within a line to make it easier to read the file. In some cases the default character is set as ```=``` as in the case ```loadenv()``` method. We can read from a readable file by using the ```readFile()``` and ```readAll()``` method. 
+Reading from files is usually done by specifying a key and a separator character. By default, Filemanager uses the colon ```:``` character to differentiate between keys and values. In some cases the default character is set as ```=``` as in the case of ```loadenv()``` method. We can read from a readable file by using the ```readFile()``` and ```readAll()``` method. 
 
    ##### Reading from text file 
 
@@ -296,7 +326,7 @@ Reading from files is usually done by specifying a key and a separator character
 
    ```txt
    name:  Foo name; 
-   class: Foo class
+   class: Foo class;
    ```
 
    > we can get the contents of the text file using the format below 
@@ -315,7 +345,7 @@ Reading from files is usually done by specifying a key and a separator character
    $contents = $Filemanager->readFile(['name', 'class']); // ['name' => 'Foo name', 'class'=> 'Foo class']   
    ```
    
-   > If a key that does not exist is being searched, the returned value will  be an empty string
+   > If a key that does not exist is being searched, the returned value will be an empty string
 
    ```php
    $Filemanager->setUrl('user.txt');
@@ -334,7 +364,7 @@ Reading from files is usually done by specifying a key and a separator character
    ```
 
    + ```$number``` number of new lines to be added to text file.
-   + ```$position``` specified where the lines should be added. 
+   + ```$position``` specifies where the lines should be added. 
 
    > Assuming we have a file  _user.txt_, we can add new lines to the file using the format below 
 
@@ -348,7 +378,7 @@ Reading from files is usually done by specifying a key and a separator character
 
    ```txt
    name:  Foo name; 
-   class: Foo class
+   class: Foo class;
    ```
      
    ```php
@@ -379,7 +409,7 @@ Reading from files is usually done by specifying a key and a separator character
 
    ```txt
    name:  Foo name; 
-   class: Foo class
+   class: Foo class;
    ```    
 
    ```php 
@@ -389,7 +419,7 @@ Reading from files is usually done by specifying a key and a separator character
    ```
 
    ###### textUpdate()
-   This method is used to update the values of already existing keys in a text file. If the specified keys do not exist, keys will be added to separate lines
+   This method is used to update the values of already existing keys in a text file. If the specified keys do not exist, then, the keys along with their values will be added on new lines
   
    ```php
    $Filemanager->textUpdate($data, $upds, $separator);
@@ -397,13 +427,13 @@ Reading from files is usually done by specifying a key and a separator character
 
    + ```$data``` array list of keys and values pairs
    + ```$upds``` used to store only updated values
-   + ```$separator``` used to set separator character. Default is ```colon```
+   + ```$separator``` used to set separator character. Default is ```colon``` sign. 
 
    > Assuming we have a file  _user.txt_, we can add or update keys of the file using the format below :
 
    ```txt
    name:  Foo name; 
-   class: Foo class
+   class: Foo class;
    ```    
 
    ```php 
@@ -417,7 +447,7 @@ Reading from files is usually done by specifying a key and a separator character
    ```txt
    name:  Bar name; 
    class: Foo class;
-   age: 50
+   age: 50;
    ```   
 
    ###### textReplace()
@@ -434,7 +464,7 @@ Reading from files is usually done by specifying a key and a separator character
 
    ```txt
    name:  Foo name; 
-   class: Foo class
+   class: Foo class;
    ```    
 
    ```php 
@@ -461,7 +491,7 @@ Reading from files is usually done by specifying a key and a separator character
    + ```$separator``` a key to value separator character 
 
    ##### Reading a file into the global ENV environment 
-   Readable file keys and value can be stored into the global ```$_ENV``` environment using the ```loadenv()``` method. By default, values are stored under the ```$_ENV[':ENV']``` key
+   Readable file keys and value can be stored into the global ```$_ENV``` environment using the ```loadenv()``` method. By default, values are stored under the ```$_ENV[':ENV']``` key. This method is mainly used to read from ```.env``` files. 
 
    ```php
    Filemanager::loadenv($url, $key, $separator); 
@@ -469,7 +499,7 @@ Reading from files is usually done by specifying a key and a separator character
 
    + ```$url``` path of the file to be read
    + ```$key``` default key is _':ENV'_ . While boolean value of true will store data directly to ```$_ENV```, false prevents overwriting predefined default $_ENV key. If a custom string name is defined, the name will be used as replacement for the default ':ENV'.
-   + ```$separator``` a key to value separator character. 
+   + ```$separator``` a key to value separator character. Note that the default character for this method is set as equal sign rather than semicolon. 
 
    ##### Detecting ENV key
    The ```env_key()``` method is used to detect the last custom key used in ```loadenv()``` method. By default this returns ```:ENV```.

@@ -3,7 +3,6 @@
 namespace Spoova\Filemanager;
 
 use ZipArchive;
-
 use Spoova\Enlist\Enlist;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -13,8 +12,10 @@ use RecursiveDirectoryIterator;
  */
 class FileManager extends Enlist{
 
+    private const DS = DIRECTORY_SEPARATOR;
     private static string $envKey = ':ENV';
     private static array $envData = [];
+    private string $separator = ':'; // default used if not overridden
     private string $url = '';
     private string $lastDir = '';
     private $zipName;
@@ -56,7 +57,17 @@ class FileManager extends Enlist{
       $this->lastDir = $url;
       return $this;
     }
-
+    
+    /**
+     * Sets universal separator character
+     * 
+     * @param string $separator separator character 
+     */
+    public function separator(string $separator = ':') {
+      $this->separator = $separator;
+      return $this;
+    }
+    
     /**
      * Get the folders existing in the url supplied
      *
@@ -427,7 +438,7 @@ class FileManager extends Enlist{
      * @param array $options postions to add new text [before, after]
      * @return boolean
      */
-    public function textUpdate($data, &$upds = '', $separator = ":") : bool {
+    public function textUpdate($data, &$replacements = '', $separator = ":") : bool {
 
       $fileUrl = $this->url;
       if(!is_file($fileUrl)) return false;   
@@ -477,7 +488,7 @@ class FileManager extends Enlist{
             if(is_numeric($key)) trigger_error('keys must have a string name',E_USER_ERROR);
 
             //may later require trimming...
-            $arrLines[] = $key.$separator." ".(is_array($value)? "[".json_encode($value)."]" : $value);
+            $arrLines[] = $key.$separator." ".(is_array($value)? "[".json_encode($value)."]" : $value).$delimiter;
 
           }
     
@@ -1104,10 +1115,10 @@ class FileManager extends Enlist{
       }
 
       // set new path or directory
-      $newDir = realpath($newdir)."\\";
+      $newDir = realpath($newdir).SELF::DS;
       $newDir .= ($newname == '')? basename($this->lastDir) : $newname;
   
-      if(!is_writable(realpath($newdir)."\\")){
+      if(!is_writable(realpath($newdir).SELF::DS)){
         $this->error = ('destination path "'.$newDir.'" is not writeable');
         return $this;
       }
@@ -1175,10 +1186,9 @@ class FileManager extends Enlist{
       if(func_num_args() === 1){
 
         // move selection to a new location
-        
         if(!is_dir($param1)){ return false; }
         rename($selection, $param1);
-        return file_exists($param1."/".$param2);
+        return file_exists($param1."/".$selection);
 
       }
 
@@ -1186,7 +1196,7 @@ class FileManager extends Enlist{
 
         //move $param1 in selection to $param2
         if(!file_exists($param2)){ 
-          $this->error = ('invalid destination path "'.$this->lastDir.'" supplied as argument(#2) on Filemanager::move() ');
+          $this->error = ('invalid destination path "'.$param2.'" supplied as argument(#2) on Filemanager::move() ');
           return false; 
         }
       
