@@ -16,6 +16,6 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "spoova/enlist":"^1"
+        "spoova/enlist":"^2"
     }
 }

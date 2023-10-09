@@ -1,9 +1,9 @@
 <?php
 
-namespace Spoova\Filemanager;
+namespace spoova\mi\core\classes;
 
 use ZipArchive;
-use Spoova\Enlist\Enlist;
+use spoova\mi\core\classes\Enlist;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 
@@ -57,7 +57,7 @@ class FileManager extends Enlist{
       $this->lastDir = $url;
       return $this;
     }
-    
+
     /**
      * Sets universal separator character
      * 
@@ -67,7 +67,7 @@ class FileManager extends Enlist{
       $this->separator = $separator;
       return $this;
     }
-    
+
     /**
      * Get the folders existing in the url supplied
      *
@@ -445,7 +445,29 @@ class FileManager extends Enlist{
     public function textUpdate($data, &$replacements = '', string $separator = ":") : bool {
 
       $fileUrl = $this->url;
-      if(!is_file($fileUrl)) return false;   
+      if(!is_file($fileUrl)) return false;  
+      
+      // //start
+      // $contents = file_get_contents($fileUrl);
+      // $lines = explode($contents, "\n");
+      // $edata = [];
+      // array_map(function($val, $key) use(&$edata, $separator){
+      //    $edata[$key.$separator] = $val;
+      // }, $data, array_keys($data));
+
+      // $newliness = [];
+      // foreach($lines as $line){
+      //   foreach($edata as $lineKey => $lineVal){
+      //     $line = ltrim($line);
+      //     if(substr($line, strlen($lineKey)) === $lineKey){
+      //       $newliness[$lineKey] = $lineVal.$delimiter."\n";
+      //     }else{
+      //       $eline = explode($line, $separator, 2);
+      //       $eline = (count($eline) === 2)? [$eline[0].$separator => $eline[0]] : $line;
+      //     }
+      //   }
+      // }
+      // //end
 
       $reading = fopen($fileUrl, 'r');
       $delimiter = ";";
@@ -472,7 +494,7 @@ class FileManager extends Enlist{
           }
           
           if(empty(ltrim($datakey) || empty($line))) continue;
-
+          
           if (stristr($line, $datakey.$separator)){        
             $replaced = true;
             $replacements[] = $datakey;
